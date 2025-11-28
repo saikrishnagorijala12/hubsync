@@ -30,7 +30,6 @@ def login():
 
 @auth_bp.route(REDIRECT_PATH)
 def authorized():
-    # state validation to avoid CSRF
     if request.args.get("state") != session.get("state"):
         return redirect(url_for("auth.index"))
 
@@ -52,7 +51,6 @@ def authorized():
 
     if result.get("id_token_claims"):
         session["user"] = result["id_token_claims"]
-        # optionally store tokens: result.get("access_token"), result.get("refresh_token")
         return redirect(url_for("auth.index"))
     else:
         return f"Login failed. Details: {result.get('error_description', result)}", 400
@@ -61,7 +59,6 @@ def authorized():
 @auth_bp.route("/logout")
 def logout():
     session.clear()
-    # note: use blueprint-qualified endpoint for post_logout_redirect_uri
     return redirect(
         f"{AUTHORITY}/oauth2/v2.0/logout?post_logout_redirect_uri={url_for('auth.index', _external=True)}"
     )

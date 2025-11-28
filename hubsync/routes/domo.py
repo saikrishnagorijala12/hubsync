@@ -17,9 +17,6 @@ import json
 with open("domo.json", "r") as f:
     data = json.load(f)
 
-print(data)
-
-
 domo_bp = Blueprint('domo', __name__, url_prefix='/domo')
 
 DOMO_API_HOST = os.getenv("DOMO_API_HOST")
@@ -27,10 +24,6 @@ DOMO_EMBED_HOST = os.getenv("DOMO_EMBED_HOST")
 DOMO_CLIENT_ID = os.getenv("DOMO_CLIENT_ID")
 DOMO_CLIENT_SECRET = os.getenv("DOMO_CLIENT_SECRET")
 CARD_DASHBORD=os.getenv("C_D")
-
-# Optional: provide default embed page ids per user (or from env)
-EMBED_PAGE_ID_1 = os.getenv("EMBED_PAGE_ID_1")  # used for specific user
-EMBED_PAGE_ID_2 = os.getenv("EMBED_PAGE_ID_2")  # default
 
 DOMO_TOKEN_CACHE = {"access_token": None, "expires_at": 0}
 _DOMO_TOKEN_LOCK = Lock()
@@ -90,7 +83,7 @@ def create_domo_embed_token(access_token: str, embed_id: str, session_length_min
     return r.json().get("authentication")
 
 
-# ---------- Auth helpers ----------
+
 def is_logged_in():
     return "user" in session
 
@@ -108,11 +101,7 @@ def choose_embed_page_for_user(user):
     Return the embed page id to use for this user.
     Replace this logic with your real mapping (DB, roles, groups, etc).
     """
-    # if not user:
-    #     return EMBED_PAGE_ID_2 or EMBED_PAGE_ID_1
-    # if user.get("name") == "Rohith":
-    #     return EMBED_PAGE_ID_1 or EMBED_PAGE_ID_2
-    # return EMBED_PAGE_ID_2
+    
 
     for entry in data:
         if entry["email"] == user.get("preferred_username"):
@@ -172,21 +161,20 @@ def domo_embed_token_api():
         return jsonify({"error": "failed to create embed token", "detail": str(e)}), 500
 
 
-# ---- Optional: helper to ensure user exists in Domo (UI preferred) ----
+
 def domo_create_user(access_token: str, email: str, first_name: str = "", last_name: str = "", role: str = "Participant"):
     """
     Example helper to create a user in Domo via API.
     NOTE: check Domo Admin API docs for exact payload and endpoint.
     This is a template showing how you'd call the users API.
     """
-    # TODO: adjust endpoint/payload per Domo docs if different
-    users_endpoint = f"{DOMO_API_HOST}/v1/users"  # verify from Domo docs
+    
+    users_endpoint = f"{DOMO_API_HOST}/v1/users"  
     payload = {
         "email": email,
         "firstName": first_name,
         "lastName": last_name,
-        "role": role,  # role name or id depending on API
-        # other fields (status, groups, etc) as needed
+        "role": role,  
     }
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
     r = requests.post(users_endpoint, headers=headers, json=payload, timeout=10)
