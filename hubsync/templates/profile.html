@@ -1,127 +1,94 @@
 {% extends "base.html" %}
 
-{% block title %}Client Engagement Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <style>
-    /* Dashboard Specific Grid */
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: 300px 1fr;
-        grid-template-rows: auto 1fr; /* Rows: KPI Cards, Main Content */
-        gap: 24px;
-        height: 100%;
-    }
-
-    /* KPI Cards Row */
-    .kpi-row {
-        grid-column: 1 / -1;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
         gap: 24px;
     }
-    .kpi-card {
-        background: white; padding: 20px; border-radius: 8px;
-        border: 1px solid var(--border-color);
-        display: flex; flex-direction: column;
-    }
-    .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); }
-    .kpi-label { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
 
-    /* Left Panel: List */
-    .list-panel {
-        background: white; border-radius: 12px; border: 1px solid var(--border-color);
-        display: flex; flex-direction: column; overflow: hidden; height: calc(100vh - 220px);
-    }
-    .list-header {
-        padding: 16px; border-bottom: 1px solid var(--border-color);
-        font-weight: 600; background: #f8fafc;
-    }
-    .list-item {
-        padding: 16px; border-bottom: 1px solid var(--border-color); cursor: pointer;
-        transition: background 0.2s;
-    }
-    .list-item:hover { background: #f1f5f9; border-left: 3px solid var(--primary-blue); }
-    .status-badge {
-        font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
-        background: #e2e8f0; color: #475569; display: inline-block; margin-top: 5px;
-    }
-    
-    /* Right Panel: Domo Embed */
-    .embed-panel {
-        background: white; border-radius: 12px; border: 1px solid var(--border-color);
-        overflow: hidden; display: flex; flex-direction: column;
-        height: calc(100vh - 220px);
-    }
-    .embed-header {
-        padding: 12px 20px; border-bottom: 1px solid var(--border-color);
-        display: flex; justify-content: space-between; align-items: center;
+    .card {
         background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        padding: 20px;
+    }
+
+    .welcome-text {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 4px;
+    }
+
+    .user-details {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .embed-panel {
+        height: calc(100vh - 260px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .embed-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+        font-weight: 600;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .refresh-btn {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        border: 1px solid var(--border-color);
+        background: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .refresh-btn:hover {
+        background: #f1f5f9;
     }
 </style>
 
-<div class="dashboard-grid">
-    
-    <!-- Top Stats (Mock Data for Visuals) -->
-    <div class="kpi-row">
-        <div class="kpi-card">
-            <span class="kpi-value">12</span>
-            <span class="kpi-label">Active Engagements</span>
-        </div>
-        <div class="kpi-card">
-            <span class="kpi-value">5</span>
-            <span class="kpi-label">Pending Client Action</span>
-        </div>
-        <div class="kpi-card">
-            <span class="kpi-value">98%</span>
-            <span class="kpi-label">SLA Compliance</span>
-        </div>
-        <div class="kpi-card">
-            <span class="kpi-value">3</span>
-            <span class="kpi-label">New Documents</span>
-        </div>
+
+<div class="page-wrapper">
+
+    <div class="card">
+        <div class="welcome-text">Welcome, {{ session.user.name }}</div>
+        <div class="user-details">{{ session.user.email or session.user.preferred_username }}</div>
     </div>
 
-    <!-- Left: Client/Work List -->
-    <div class="list-panel">
-        <div class="list-header">Your Worklist</div>
-        <div style="overflow-y: auto;">
-            <!-- Mock Items -->
-            <div class="list-item">
-                <div style="font-weight: 600;">Acme Corp Tax Return</div>
-                <div style="font-size: 0.8rem; color: #64748b;">FY 2024 - 1040</div>
-                <span class="status-badge" style="background: #dbeafe; color: #1e40af;">In Progress</span>
-            </div>
-            <div class="list-item">
-                <div style="font-weight: 600;">Wayne Enterprises</div>
-                <div style="font-size: 0.8rem; color: #64748b;">Audit Review</div>
-                <span class="status-badge" style="background: #fef3c7; color: #92400e;">Pending Sign-off</span>
-            </div>
-            <div class="list-item">
-                <div style="font-weight: 600;">Stark Industries</div>
-                <div style="font-size: 0.8rem; color: #64748b;">Consulting</div>
-                <span class="status-badge">Completed</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- Right: DOMO Embed -->
-    <div class="embed-panel">
+    <div class="card embed-panel">
+
         <div class="embed-header">
-            <div style="font-weight: 600;"> <i class="fas fa-chart-pie" style="color: var(--primary-blue); margin-right: 8px;"></i> Analytics Overview</div>
-            <button class="btn" style="padding: 4px 12px; font-size: 0.8rem; background: #f1f5f9;" onclick="document.getElementById('domoFrame').src += ''">
-                <i class="fas fa-sync-alt"></i> Refresh
+            <span>
+                <i class="fas fa-chart-pie" style="margin-right: 8px; color: var(--primary-blue);"></i>
+                Analytics Overview
+            </span>
+
+            <button class="refresh-btn" onclick="document.getElementById('domoFrame').src += ''">
+                <i class="fas fa-sync-alt" style="margin-right: 6px;"></i> Refresh
             </button>
         </div>
-        <!-- THIS IS WHERE YOUR PYTHON DOMO ROUTE GOES -->
-        <iframe 
-            id="domoFrame"
-            src="{{ url_for('domo.embed_page') }}" 
-            width="100%" 
-            height="100%" 
+
+        <iframe id="domoFrame" src="{{ url_for('domo.embed_page') }}" width="100%" height="100%"
             style="border: none; flex: 1;">
         </iframe>
-    </div>
 
+    </div>
 </div>
+
 {% endblock %}

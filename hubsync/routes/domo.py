@@ -1,17 +1,14 @@
 from flask import (
-    
     redirect,
     url_for,
     session,
     Blueprint,
     render_template_string,
     jsonify,
-    
 )
-import os,time,requests
+import os, time, requests
 from threading import Lock
 import json
-
 
 
 with open("domo.json", "r") as f:
@@ -23,18 +20,19 @@ DOMO_API_HOST = os.getenv("DOMO_API_HOST")
 DOMO_EMBED_HOST = os.getenv("DOMO_EMBED_HOST")
 DOMO_CLIENT_ID = os.getenv("DOMO_CLIENT_ID")
 DOMO_CLIENT_SECRET = os.getenv("DOMO_CLIENT_SECRET")
-CARD_DASHBORD=os.getenv("C_D")
+CARD_DASHBORD = os.getenv("C_D")
 
 DOMO_TOKEN_CACHE = {"access_token": None, "expires_at": 0}
 _DOMO_TOKEN_LOCK = Lock()
 
+
+# ---------------------------
+# AUTH TOKEN HANDLING
+# ---------------------------
 def get_domo_access_token(scopes: str = "data user dashboard"):
-    """
-    Request Domo OAuth token using client_credentials.
-    Process-memory cache. Use Redis or similar in production.
-    """
     now = time.time()
     with _DOMO_TOKEN_LOCK:
+        # Use cache if token still valid
         if DOMO_TOKEN_CACHE["access_token"] and DOMO_TOKEN_CACHE["expires_at"] > now + 5:
             return DOMO_TOKEN_CACHE["access_token"]
 
@@ -46,19 +44,20 @@ def get_domo_access_token(scopes: str = "data user dashboard"):
         r = requests.post(token_url, auth=auth, data=data, headers=headers, timeout=10)
         r.raise_for_status()
         j = r.json()
+
         access_token = j.get("access_token")
         expires_in = int(j.get("expires_in", 300))
 
         DOMO_TOKEN_CACHE["access_token"] = access_token
         DOMO_TOKEN_CACHE["expires_at"] = time.time() + expires_in
+
         return access_token
 
 
+# ---------------------------
+# EMBED TOKEN CREATION
+# ---------------------------
 def create_domo_embed_token(access_token: str, embed_id: str, session_length_minutes: int = 60):
-    """
-    Request an embed token from the Domo API.
-    Make sure embed_id is valid and the Domo client has access.
-    """
     if not embed_id:
         raise ValueError("embed_id is required")
 
@@ -73,20 +72,24 @@ def create_domo_embed_token(access_token: str, embed_id: str, session_length_min
             }
         ]
     }
+
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/json",
         "Content-Type": "application/json",
     }
+
     r = requests.post(embed_token_url, headers=headers, json=payload, timeout=10)
     r.raise_for_status()
+
     return r.json().get("authentication")
 
 
-
+# ---------------------------
+# HELPERS
+# ---------------------------
 def is_logged_in():
     return "user" in session
-
 
 
 @domo_bp.route("/api/me")
@@ -96,87 +99,172 @@ def api_me():
     return jsonify({"user": session["user"]})
 
 
-def choose_embed_page_for_user(user):
-    """
-    Return the embed page id to use for this user.
-    Replace this logic with your real mapping (DB, roles, groups, etc).
-    """
-    
-
-    for entry in data:
-        if entry["email"] == user.get("preferred_username"):
-            return entry["embed_id"]
+def choose_embed_pages_for_user(user):
+    """Return list of embed pages for logged-in user."""
+    user_email = user.get("preferred_username")
+    return [entry["embed_id"] for entry in data if entry["email"] == user_email]
 
 
+# ---------------------------
+# MULTI-IFRAME EMBED RENDER
+# ---------------------------
 @domo_bp.route("/embed-page")
 def embed_page():
     if not is_logged_in():
         return redirect(url_for("login"))
 
     user = session.get("user")
-    page_id = choose_embed_page_for_user(user)
-    if not page_id:
-        return render_template_string("<h3>No embed page configured for this user</h3>"), 500
+    page_ids = choose_embed_pages_for_user(user)
+
+    if not page_ids:
+        return render_template_string("<h3>No embed pages configured for this user</h3>"), 404
 
     try:
         access_token = get_domo_access_token()
-        embed_token = create_domo_embed_token(access_token, page_id, session_length_minutes=60)
-        if not embed_token:
-            raise RuntimeError("Domo did not return an embed token")
+        embeds = [
+            {"id": page_id, "token": create_domo_embed_token(access_token, page_id, 60)}
+            for page_id in page_ids
+        ]
     except Exception as e:
-        return render_template_string("<h3>Error creating Domo embed token</h3><pre>{{err}}</pre>", err=str(e)), 500
+        return render_template_string("<h3>Error generating embed tokens</h3><pre>{{err}}</pre>", err=str(e)), 500
 
-    html = f"""
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Domo Embed</title>
-        <style>html,body,iframe{{height:100%;margin:0;padding:0;border:0}} iframe{{width:100%}}</style>
-      </head>
-      <body>
-        <form id="domoForm" action="{DOMO_EMBED_HOST}/embed/pages/{page_id}" method="post" target="domoFrame">
-          <input type="hidden" name="embedToken" value="{embed_token}" />
-        </form>
-        <iframe name="domoFrame" id="domoFrame" frameborder="0" allowfullscreen></iframe>
-        <script>document.getElementById('domoForm').submit();</script>
-      </body>
-    </html>
-    """
-    return render_template_string(html)
+    embed_template = """
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Domo Tabbed Embed</title>
+<style>
+    body { margin: 0; padding: 0; background: #eef7f8; font-family: sans-serif; }
+
+    .tabs {
+        display: flex;
+        background: #ffffff;
+        border-bottom: 2px solid #ccc;
+    }
+
+    .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        border-right: 1px solid #ddd;
+        background: #f5f5f5;
+        font-weight: 500;
+        transition: background .2s;
+    }
+
+    .tab:hover {
+        background: #e8e8e8;
+    }
+
+    .tab.active {
+        background: #379095;
+        color: white;
+    }
+
+    iframe {
+        width: 100%;
+        height: calc(100vh - 60px);
+        border: none;
+        display: none;
+    }
+
+    iframe.active {
+        display: block;
+    }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+{% for item in embeds %}
+    <div class="tab {% if loop.first %}active{% endif %}" data-target="frame{{ loop.index }}">
+        Dashboard {{ loop.index }}
+    </div>
+{% endfor %}
+</div>
+
+{% for item in embeds %}
+    <form id="form{{ loop.index }}" action="{{ host }}/embed/pages/{{ item.id }}" method="post" target="frame{{ loop.index }}">
+        <input type="hidden" name="embedToken" value="{{ item.token }}">
+    </form>
+
+    <iframe 
+        name="frame{{ loop.index }}" 
+        id="frame{{ loop.index }}" 
+        class="{% if loop.first %}active{% endif %}">
+    </iframe>
+{% endfor %}
+
+<script>
+    // Auto-submit forms to load iframes
+    document.querySelectorAll("form").forEach(form => form.submit());
+
+    // Tab switching logic
+    const tabs = document.querySelectorAll(".tab");
+    const frames = document.querySelectorAll("iframe");
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            // Remove active classes
+            tabs.forEach(t => t.classList.remove("active"));
+            frames.forEach(f => f.classList.remove("active"));
+
+            // Activate clicked tab + matching iframe
+            tab.classList.add("active");
+            let frame = document.getElementById(tab.dataset.target);
+            if (frame) frame.classList.add("active");
+        });
+    });
+</script>
+
+</body>
+</html>
+"""
+
+    return render_template_string(embed_template, embeds=embeds, host=DOMO_EMBED_HOST)
 
 
+
+# ---------------------------
+# MULTI-TOKEN API ENDPOINT
+# ---------------------------
 @domo_bp.route("/domo/embed-token")
 def domo_embed_token_api():
     if not is_logged_in():
         return jsonify({"error": "Unauthorized"}), 401
+
     try:
+        user = session.get("user")
+        page_ids = choose_embed_pages_for_user(user)
+
+        if not page_ids:
+            return jsonify({"error": "No embed pages configured for this user"}), 404
+
         access_token = get_domo_access_token()
-        page_id = choose_embed_page_for_user(session.get("user"))
-        embed_token = create_domo_embed_token(access_token, page_id, session_length_minutes=60)
-        if not embed_token:
-            raise RuntimeError("Domo did not return an embed token")
-        return jsonify({"embedToken": embed_token})
+
+        embed_list = [
+            {"embed_id": page_id, "embedToken": create_domo_embed_token(access_token, page_id, 60)}
+            for page_id in page_ids
+        ]
+
+        return jsonify({
+            "user": user.get("preferred_username"),
+            "count": len(embed_list),
+            "embeds": embed_list
+        })
+
     except Exception as e:
-        return jsonify({"error": "failed to create embed token", "detail": str(e)}), 500
+        return jsonify({"error": "failed to create embed tokens", "detail": str(e)}), 500
 
 
-
+# ---------------------------
+# USER CREATION (OPTIONAL)
+# ---------------------------
 def domo_create_user(access_token: str, email: str, first_name: str = "", last_name: str = "", role: str = "Participant"):
-    """
-    Example helper to create a user in Domo via API.
-    NOTE: check Domo Admin API docs for exact payload and endpoint.
-    This is a template showing how you'd call the users API.
-    """
-    
-    users_endpoint = f"{DOMO_API_HOST}/v1/users"  
-    payload = {
-        "email": email,
-        "firstName": first_name,
-        "lastName": last_name,
-        "role": role,  
-    }
+    users_endpoint = f"{DOMO_API_HOST}/v1/users"
+    payload = {"email": email, "firstName": first_name, "lastName": last_name, "role": role}
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+
     r = requests.post(users_endpoint, headers=headers, json=payload, timeout=10)
     r.raise_for_status()
     return r.json()

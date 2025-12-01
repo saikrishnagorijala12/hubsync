@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HubSync Clone Dashboard</title>
-    <!-- Font Awesome for Icons -->
+    <title>Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --primary-blue: #0056b3;
-            --primary-dark: #004494;
-            --sidebar-bg: #1e293b;
-            --bg-color: #f1f5f9;
-            --text-main: #334155;
-            --text-light: #64748b;
-            --border-color: #e2e8f0;
+            --primary: #379095;
+            --primary-light-1: #4aa8ad;
+            --primary-light-2: #67bec3;
+            --primary-light-3: #8cd3d7;
+            --primary-dark-1: #2d7579;
+            --primary-dark-2: #245c5f;
+            --primary-dark-3: #194244;
+            --sidebar-bg: var(--primary-dark-2);
+            --bg-color: #eef7f8;
+            --text-main: #2a3e3f;
+            --text-light: #5b7779;
+            --border-color: #cfe5e6;
             --sidebar-width: 260px;
             --header-height: 64px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Inter, system-ui, sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+        }
 
-        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
 
-        /* --- Sidebar (Only visible when logged in) --- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -35,6 +50,14 @@
             transition: all 0.3s ease;
         }
 
+        .sidebar-logo {
+            width: 140px;
+            /* adjust as needed */
+            margin: 20px auto;
+            display: block;
+        }
+
+
         .brand {
             height: var(--header-height);
             display: flex;
@@ -42,97 +65,170 @@
             padding: 0 24px;
             font-size: 1.25rem;
             font-weight: 700;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             text-decoration: none;
         }
-        .brand span { color: #3b82f6; }
 
-        .nav-menu { list-style: none; padding: 20px 10px; flex: 1; }
-        .nav-item { margin-bottom: 4px; }
-        .nav-link {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; color: #94a3b8; text-decoration: none;
-            border-radius: 6px; transition: 0.2s; font-size: 0.95rem;
+        .brand span {
+            color: var(--primary-light-2);
         }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-link i { width: 20px; text-align: center; }
 
-        /* --- Main Content Area --- */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .nav-menu {
+            list-style: none;
+            padding: 20px 10px;
+            flex: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #cfe5e6;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-dark-1);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
         header {
             height: var(--header-height);
             background: white;
             border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 0 32px;
-            flex-shrink: 0;
         }
 
-        .header-title { font-weight: 600; font-size: 1.1rem; }
+        .header-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
 
-        .user-menu { display: flex; align-items: center; gap: 16px; }
+        .user-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
         .user-avatar {
-            width: 36px; height: 36px; background: var(--primary-blue);
-            color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.9rem;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
-        /* --- Content Injection --- */
+        .dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            width: 240px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            z-index: 999;
+        }
+
+        .dropdown-info {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+
+        .dropdown-info small {
+            display: block;
+            margin-top: 2px;
+            word-break: break-all;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-light-3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
         .content-area {
             flex: 1;
             overflow-y: auto;
             padding: 24px;
         }
 
-        /* --- Flash Messages --- */
-        .flash-messages { margin-bottom: 20px; }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
         .flash-msg {
-            padding: 12px 16px; background: #fee2e2; color: #991b1b;
-            border-radius: 6px; margin-bottom: 8px; border: 1px solid #fecaca;
+            padding: 12px 16px;
+            background: #fdeaea;
+            color: var(--primary-dark-3);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--primary-light-2);
         }
 
-        /* --- Utility Classes --- */
-        .card { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn { display: inline-block; padding: 10px 20px; border-radius: 6px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-primary { background: var(--primary-blue); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
-
-        /* --- Login Page Layout Specifics --- */
-        body.login-layout {
-            align-items: center; justify-content: center;
-            background: #f8fafc;
+        .login-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .login-container { width: 100%; max-width: 440px; padding: 20px; }
-
-        /* Hide Scrollbar for clean look */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
+
 <body class="{% if not session.get('user') %}login-layout{% endif %}">
 
     {% if session.get('user') %}
-    <!-- SIDEBAR (Visible only when logged in) -->
     <nav class="sidebar">
-        <a href="#" class="brand">Hub<span>Sync</span></a>
+        <img class="sidebar-logo" src="{{ url_for('static', filename='images/mjcpa_logo.png') }}" alt="logo">
         <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{{ url_for('auth.profile') }}" class="nav-link active">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-folder-open"></i> Documents</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-users"></i> Client List</a>
-            </li>
-            <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+            <li><a href="{{ url_for('auth.profile') }}" class="nav-link active"><i class="fas fa-chart-line"></i>
+                    Dashboard</a></li>
+            <li style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
                 <a href="{{ url_for('auth.logout') }}" class="nav-link">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -140,41 +236,66 @@
         </ul>
     </nav>
 
-    <!-- MAIN WRAPPER -->
     <div class="main-wrapper">
+
         <header>
             <div class="header-title">{% block title %}Overview{% endblock %}</div>
-            <div class="user-menu">
-                <div style="text-align: right;">
-                    <div style="font-weight: 600; font-size: 0.9rem;">{{ session.user.name }}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-light);">{{ session.user.email or session.user.preferred_username }}</div>
-                </div>
-                <div class="user-avatar">
-                    {{ (session.user.name or 'U')[0].upper() }}
+
+            <div class="user-menu" onclick="toggleDropdown()">
+                <div class="user-avatar">{{ (session.user.name or 'U')[0].upper() }}</div>
+                <i class="fas fa-caret-down"></i>
+
+                <div id="userDropdown" class="dropdown hidden">
+                    <div class="dropdown-info">
+                        <strong>{{ session.user.name }}</strong><br>
+                        <small>{{ session.user.email or session.user.preferred_username }}</small>
+                    </div>
+                    <hr>
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                 </div>
             </div>
         </header>
 
         <div class="content-area">
             {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <div class="flash-messages">
-                    {% for msg in messages %}
-                        <div class="flash-msg">{{ msg }}</div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for msg in messages %}
+                <div class="flash-msg">{{ msg }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% endwith %}
-            
+
             {% block content %}{% endblock %}
         </div>
     </div>
+
     {% else %}
-        <!-- LOGIN LAYOUT (No Sidebar) -->
-        <div class="login-container">
-            {% block login_content %}{% endblock %}
-        </div>
+
+    <div class="login-container">
+        {% block login_content %}{% endblock %}
+    </div>
+
     {% endif %}
 
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("hidden");
+        }
+
+        document.addEventListener("click", function (e) {
+            const menu = document.querySelector(".user-menu");
+            const dropdown = document.getElementById("userDropdown");
+
+            if (!menu.contains(e.target)) {
+                dropdown.classList.add("hidden");
+            }
+        });
+    </script>
+
 </body>
+
 </html>
