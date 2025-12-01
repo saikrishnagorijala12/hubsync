@@ -16,7 +16,7 @@ def index():
 @auth_bp.route('/profile')
 def profile():
     if session.get("user"):
-        print(session.get("user"))
+        # print(session.get("user"))
         return render_template("profile.html", user=session["user"])
     else: 
         return redirect(url_for("auth.index"))

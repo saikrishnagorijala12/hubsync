@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef7f8;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+        }
+
+        .tabs {
+            display: flex;
+            background: #ffffff;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            /* border-right: 1px solid #ddd; */
+            /* background: #f5f5f5; */
+            font-weight: 300;
+            transition: background .2s;
+        }
+
+        .tab:hover {
+            background: #e8e8e8;
+        }
+
+        .tab.active {
+            background: #379095;
+            color: white;
+            font-weight: 500;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+            display: none;
+        }
+
+        iframe.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tabs">
+        {% for item in embeds %}
+        <div class="tab {% if loop.first %}active{% endif %}" data-target="frame{{ loop.index }}">
+            Dashboard {{ loop.index }}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% for item in embeds %}
+    <form id="form{{ loop.index }}" action="{{ host }}/embed/pages/{{ item.id }}" method="post"
+        target="frame{{ loop.index }}">
+        <input type="hidden" name="embedToken" value="{{ item.token }}">
+    </form>
+
+    <iframe name="frame{{ loop.index }}" id="frame{{ loop.index }}" class="{% if loop.first %}active{% endif %}">
+    </iframe>
+    {% endfor %}
+
+    <script>
+        document.querySelectorAll("form").forEach(form => form.submit());
+
+        const tabs = document.querySelectorAll(".tab");
+        const frames = document.querySelectorAll("iframe");
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                frames.forEach(f => f.classList.remove("active"));
+
+                tab.classList.add("active");
+                let frame = document.getElementById(tab.dataset.target);
+                if (frame) frame.classList.add("active");
+            });
+        });
+    </script>
+
+</body>
+
+</html>
