@@ -1,0 +1,64 @@
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+}
+
+.user-card .welcome-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.user-card .user-details {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Embedded Section */
+
+.embed-panel {
+    height: calc(100vh - 260px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.embed-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    font-weight: 600;
+    border-radius: 12px 12px 0 0;
+}
+
+.refresh-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.refresh-btn:hover {
+    background: #f1f5f9;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex: 1;
+}

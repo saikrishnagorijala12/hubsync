@@ -3,50 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #eef7f8;
-            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
-        }
-
-        .tabs {
-            display: flex;
-            background: #ffffff;
-            border-bottom: 2px solid #ccc;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            /* border-right: 1px solid #ddd; */
-            /* background: #f5f5f5; */
-            font-weight: 300;
-            transition: background .2s;
-        }
-
-        .tab:hover {
-            background: #e8e8e8;
-        }
-
-        .tab.active {
-            background: #379095;
-            color: white;
-            font-weight: 500;
-        }
-
-        iframe {
-            width: 100%;
-            height: calc(100vh - 60px);
-            border: none;
-            display: none;
-        }
-
-        iframe.active {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/domo_embed.css') }}">
 </head>
 
 <body>
@@ -69,24 +26,18 @@
     </iframe>
     {% endfor %}
 
-    <script>
-        document.querySelectorAll("form").forEach(form => form.submit());
+<script>
+document.querySelectorAll("form").forEach(form => form.submit());
+document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll("iframe").forEach(f => f.classList.remove("active"));
 
-        const tabs = document.querySelectorAll(".tab");
-        const frames = document.querySelectorAll("iframe");
-
-        tabs.forEach(tab => {
-            tab.addEventListener("click", () => {
-                tabs.forEach(t => t.classList.remove("active"));
-                frames.forEach(f => f.classList.remove("active"));
-
-                tab.classList.add("active");
-                let frame = document.getElementById(tab.dataset.target);
-                if (frame) frame.classList.add("active");
-            });
-        });
-    </script>
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.target).classList.add("active");
+    });
+});
+</script>
 
 </body>
-
 </html>

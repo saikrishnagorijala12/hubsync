@@ -1,92 +1,30 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<style>
-    .page-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    .card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        padding: 20px;
-    }
-
-    .welcome-text {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: var(--primary-blue);
-        margin-bottom: 4px;
-    }
-
-    .user-details {
-        font-size: 0.9rem;
-        color: var(--text-light);
-    }
-
-    .embed-panel {
-        height: calc(100vh - 260px);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .embed-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8fafc;
-        font-weight: 600;
-        border-radius: 12px 12px 0 0;
-    }
-
-    .refresh-btn {
-        padding: 6px 14px;
-        font-size: 0.8rem;
-        border: 1px solid var(--border-color);
-        background: #fff;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: .2s;
-    }
-
-    .refresh-btn:hover {
-        background: #f1f5f9;
-    }
-</style>
-
 
 <div class="page-wrapper">
 
-    <div class="card">
+    <div class="card user-card">
         <div class="welcome-text">Welcome, {{ session.user.name }}</div>
         <div class="user-details">{{ session.user.email or session.user.preferred_username }}</div>
     </div>
 
-
     <div class="card embed-panel">
 
         <div class="embed-header">
-            <span>
-                <i class="fas fa-chart-pie" style="margin-right: 8px; color: var(--primary-blue);"></i>
-                Analytics Overview
-            </span>
-
+            <span><i class="fas fa-chart-pie"></i> Analytics Overview</span>
             <button class="refresh-btn" onclick="document.getElementById('domoFrame').src += ''">
-                <i class="fas fa-sync-alt" style="margin-right: 6px;"></i> Refresh
+                <i class="fas fa-sync-alt"></i> Refresh
             </button>
         </div>
 
-        <iframe id="domoFrame" src="{{ url_for('domo.embed_page') }}" width="100%" height="100%"
-            style="border: none; flex: 1;">
-        </iframe>
+        <iframe id="domoFrame" src="{{ url_for('domo.embed_page') }}"></iframe>
 
     </div>
 </div>

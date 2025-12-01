@@ -1,45 +1,18 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
 {% block login_content %}
+<div class="card login-card">
 
-<div class="card" style="
-    padding: 40px; 
-    text-align: center; 
-    background: white; 
-    border-radius: 12px; 
-    border: 1px solid var(--border-color);
-     width: 420px;
-">
+    <img src="{{ url_for('static', filename='images/mjcpa_logo.png') }}" class="logo">
 
-    <!-- Logo -->
-    <img src="{{ url_for('static', filename='images/mjcpa_logo.png') }}" alt="logo"
-        style="width: 140px; margin-bottom: 24px;">
+    <h2 class="title">Welcome Back</h2>
+    <p class="subtitle">Please sign in to access your dashboard.</p>
 
-
-    <h2 style="margin-bottom: 12px; color: var(--primary-dark-3); font-weight: 600;">
-        Welcome Back
-    </h2>
-
-    <p style="color: var(--text-light); margin-bottom: 32px;">
-        Please sign in to access your dashboard.
-    </p>
-
-    <!-- Sign-in button -->
-    <a href="{{ url_for('auth.login') }}" style="
-            width: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px;
-            padding: 12px 18px;
-            background: var(--primary-dark-1);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: 0.2s;
-        " onmouseover="this.style.background='var(--primary-dark-1)'"
-        onmouseout="this.style.background='var(--primary)'">
+    <a class="login-btn" href="{{ url_for('auth.login') }}">
         <i class="fab fa-microsoft"></i> Sign in with Microsoft
     </a>
 </div>
