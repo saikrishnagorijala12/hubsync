@@ -89,7 +89,7 @@ header {
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: end;
   padding: 0 32px;
 }
 

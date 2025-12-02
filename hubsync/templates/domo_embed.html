@@ -11,7 +11,7 @@
     <div class="tabs">
         {% for item in embeds %}
         <div class="tab {% if loop.first %}active{% endif %}" data-target="frame{{ loop.index }}">
-            Dashboard {{ loop.index }}
+            Card {{ loop.index }}
         </div>
         {% endfor %}
     </div>
@@ -26,18 +26,19 @@
     </iframe>
     {% endfor %}
 
-<script>
-document.querySelectorAll("form").forEach(form => form.submit());
-document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        document.querySelectorAll("iframe").forEach(f => f.classList.remove("active"));
+    <script>
+        document.querySelectorAll("form").forEach(form => form.submit());
+        document.querySelectorAll(".tab").forEach(tab => {
+            tab.addEventListener("click", () => {
+                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                document.querySelectorAll("iframe").forEach(f => f.classList.remove("active"));
 
-        tab.classList.add("active");
-        document.getElementById(tab.dataset.target).classList.add("active");
-    });
-});
-</script>
+                tab.classList.add("active");
+                document.getElementById(tab.dataset.target).classList.add("active");
+            });
+        });
+    </script>
 
 </body>
+
 </html>

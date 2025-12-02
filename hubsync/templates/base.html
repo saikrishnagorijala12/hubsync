@@ -19,10 +19,11 @@
         <img class="sidebar-logo" src="{{ url_for('static', filename='images/mjcpa_logo.png') }}" alt="logo">
         <ul class="nav-menu">
             <li><a href="{{ url_for('auth.profile') }}" class="nav-link active">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a></li>
+                    <i class="fa-solid fa-square-poll-vertical"></i>Dashboard
+                </a>
+            </li>
 
-            <li style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+            <li style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
                 <a href="{{ url_for('auth.logout') }}" class="nav-link">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -32,7 +33,6 @@
 
     <div class="main-wrapper">
         <header>
-            <div class="header-title">{% block header_title %}Overview{% endblock %}</div>
 
             <div class="user-menu" onclick="toggleDropdown()">
                 <div class="user-avatar">{{ (session.user.name or 'U')[0].upper() }}</div>
@@ -62,16 +62,17 @@
     </div>
     {% endif %}
 
-<script>
-function toggleDropdown() {
-    document.getElementById("userDropdown").classList.toggle("hidden");
-}
-document.addEventListener("click", function (e) {
-    const menu = document.querySelector(".user-menu");
-    const dropdown = document.getElementById("userDropdown");
-    if (!menu.contains(e.target)) dropdown.classList.add("hidden");
-});
-</script>
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("hidden");
+        }
+        document.addEventListener("click", function (e) {
+            const menu = document.querySelector(".user-menu");
+            const dropdown = document.getElementById("userDropdown");
+            if (!menu.contains(e.target)) dropdown.classList.add("hidden");
+        });
+    </script>
 
 </body>
+
 </html>
